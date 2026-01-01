@@ -1,58 +1,72 @@
-import { useState } from 'react';
-import type { Movie } from '../../types/movie';
-import { fetchMovies } from '../../services/movieService';
+import React, { useState } from 'react';
 import SearchBar from '../SearchBar/SearchBar';
-import toast, { Toaster } from 'react-hot-toast';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
-import './App.css';
+import { type Movie } from '../../types/movie';
+import { fetchMovies } from '../../services/movieService';
+import { Toaster, toast } from 'react-hot-toast';
+import styles from './App.module.css';
 
-function App() {
+const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const closeModal = () => {
-    setSelectedMovie(null);
-  };
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      toast.error('Please enter your search query.');
+      return;
+    }
 
-  const handleRequest = async (movie: string) => {
+    setLoading(true);
+    setError(false);
+    setMovies([]);
+
     try {
-      setIsLoading(true);
-      setIsError(false);
-      const data = await fetchMovies(movie);
-      if (data.length < 1) {
-        toast.error('No movies found for your request.');
+      const results = await fetchMovies({ query });
+      if (results.length === 0) {
+        toast('No movies found for your request.');
       }
-      setMovies(data);
-    } catch {
-      setIsError(true);
+      setMovies(results);
+    } catch (err) {
+      console.error(err);
+      setError(true);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const onSelectHandler = (movie: Movie) => {
-    setSelectedMovie(movie);
-  };
-
   return (
-    <>
-      <Toaster />
-      <SearchBar onSubmit={handleRequest} />
-      {isError && <ErrorMessage />}
-      {isLoading && <Loader />}
-      {movies.length > 0 && (
-        <MovieGrid onSelect={onSelectHandler} movies={movies} />
+    <div className={styles.app}>
+      {}
+      <Toaster position="top-right" reverseOrder={false} />
+
+      {}
+      <SearchBar onSubmit={handleSearch} />
+
+      {}
+      {loading && <Loader />}
+
+      {}
+      {error && <ErrorMessage />}
+
+      {}
+      {!loading && !error && movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
+
+      {}
       {selectedMovie && (
-        <MovieModal movie={selectedMovie} onClose={closeModal} />
+        <MovieModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
-    </>
+    </div>
   );
-}
+};
 
 export default App;
