@@ -7,7 +7,7 @@ import MovieModal from '../MovieModal/MovieModal';
 import { type Movie } from '../../types/movie';
 import { fetchMovies } from '../../services/movieService';
 import { Toaster, toast } from 'react-hot-toast';
-import styles from './App.module.css';
+import css from './App.module.css';
 
 const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -40,7 +40,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={styles.app}>
+    <div className={css.app}>
       {}
       <Toaster position="top-right" reverseOrder={false} />
 
